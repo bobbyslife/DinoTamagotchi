@@ -377,39 +377,69 @@ class EnhancedSupabaseDino(rumps.App):
         
         # Website categories (simplified for friendlier UI)
         self.website_categories = {
-            'productive': {
-                'domains': ['github.com', 'stackoverflow.com', 'docs.', 'developer.', 'learn.', 'coursera.com', 'udemy.com'],
-                'keywords': ['documentation', 'tutorial', 'learn', 'course', 'guide'],
-                'dumpling_rate': 2.0,  # Coding rate
+            'coding': {
+                'domains': ['github.com', 'gitlab.com', 'bitbucket.org', 'stackoverflow.com', 'codepen.io', 'replit.com'],
+                'keywords': ['code', 'repository', 'commit', 'pull request', 'api'],
+                'dumpling_rate': 2.0,
                 'emoji': '💻'
             },
-            'work': {
-                'domains': ['gmail.com', 'google.com/drive', 'notion.so', 'trello.com', 'asana.com', 'monday.com'],
-                'keywords': ['email', 'calendar', 'meeting', 'project'],
+            'learning': {
+                'domains': ['docs.', 'developer.', 'learn.', 'coursera.com', 'udemy.com', 'khanacademy.org', 'pluralsight.com'],
+                'keywords': ['documentation', 'tutorial', 'learn', 'course', 'guide', 'training'],
+                'dumpling_rate': 1.8,
+                'emoji': '📚'
+            },
+            'designing': {
+                'domains': ['figma.com', 'sketch.com', 'adobe.com', 'dribbble.com', 'behance.net', 'canva.com'],
+                'keywords': ['design', 'ui', 'ux', 'prototype', 'mockup', 'wireframe'],
+                'dumpling_rate': 1.5,
+                'emoji': '🎨'
+            },
+            'productivity': {
+                'domains': ['notion.so', 'trello.com', 'asana.com', 'monday.com', 'linear.app', 'todoist.com'],
+                'keywords': ['task', 'project', 'todo', 'organize', 'planning'],
+                'dumpling_rate': 1.2,
+                'emoji': '📋'
+            },
+            'communication': {
+                'domains': ['gmail.com', 'outlook.com', 'slack.com', 'discord.com', 'zoom.us', 'teams.microsoft.com'],
+                'keywords': ['email', 'message', 'meeting', 'call', 'chat'],
                 'dumpling_rate': 0.8,
                 'emoji': '💼'
             },
+            'research': {
+                'domains': ['wikipedia.org', 'scholar.google.com', 'medium.com', 'dev.to', 'hashnode.com'],
+                'keywords': ['research', 'article', 'paper', 'study', 'analysis'],
+                'dumpling_rate': 1.0,
+                'emoji': '🔍'
+            },
             'social': {
-                'domains': ['twitter.com', 'x.com', 'facebook.com', 'instagram.com', 'reddit.com', 'tiktok.com'],
-                'keywords': ['social', 'post', 'feed', 'comment'],
+                'domains': ['twitter.com', 'x.com', 'facebook.com', 'instagram.com', 'reddit.com', 'tiktok.com', 'linkedin.com'],
+                'keywords': ['social', 'post', 'feed', 'comment', 'like', 'share'],
                 'dumpling_rate': -0.2,
                 'emoji': '📱'
             },
             'news': {
-                'domains': ['news.', 'cnn.com', 'bbc.com', 'nytimes.com', 'techcrunch.com', 'ycombinator.com'],
-                'keywords': ['news', 'article', 'breaking'],
+                'domains': ['news.', 'cnn.com', 'bbc.com', 'nytimes.com', 'techcrunch.com', 'ycombinator.com', 'hackernews'],
+                'keywords': ['news', 'article', 'breaking', 'headlines'],
                 'dumpling_rate': -0.1,
                 'emoji': '📰'
             },
             'entertainment': {
-                'domains': ['youtube.com', 'netflix.com', 'twitch.tv', 'spotify.com'],
-                'keywords': ['video', 'music', 'stream', 'watch'],
+                'domains': ['youtube.com', 'netflix.com', 'twitch.tv', 'spotify.com', 'hulu.com', 'disney.com'],
+                'keywords': ['video', 'music', 'stream', 'watch', 'movie', 'show'],
                 'dumpling_rate': -0.3,
                 'emoji': '🍿'
             },
+            'gaming': {
+                'domains': ['steam.com', 'twitch.tv/directory/game', 'itch.io', 'epicgames.com'],
+                'keywords': ['game', 'gaming', 'play', 'level', 'achievement'],
+                'dumpling_rate': -0.4,
+                'emoji': '🎮'
+            },
             'shopping': {
-                'domains': ['amazon.com', 'ebay.com', 'etsy.com', 'shopify.com'],
-                'keywords': ['shop', 'buy', 'cart', 'checkout'],
+                'domains': ['amazon.com', 'ebay.com', 'etsy.com', 'shopify.com', 'target.com', 'walmart.com'],
+                'keywords': ['shop', 'buy', 'cart', 'checkout', 'purchase', 'deal'],
                 'dumpling_rate': -0.15,
                 'emoji': '🛒'
             }
@@ -557,10 +587,11 @@ class EnhancedSupabaseDino(rumps.App):
             rumps.MenuItem("🥟 Feed (-5)", callback=self.feed),
             rumps.MenuItem("🫳 Pet (free)", callback=self.pet),
             rumps.separator,
-            rumps.MenuItem("👥 Friends & Multiplayer", callback=self.show_friends_menu),
+            rumps.MenuItem("👥 Community", callback=self.show_friends_menu),
             rumps.MenuItem("📤 Invite Friends", callback=self.invite_friends),
             rumps.MenuItem("🆔 My Friend Code", callback=self.share_friend_code),
             self.notifications_toggle,
+            rumps.MenuItem("🔔 Test Notification", callback=self.test_notification),
             rumps.separator,
             rumps.MenuItem("🔄 Quit", callback=self.quit_app)
         ]
@@ -808,6 +839,13 @@ Currently I have {int(self.dumplings)} dumplings! Let's motivate each other to s
         self.send_native_notification("🔔 Notifications",
                                     f"Notifications {status.lower()}",
                                     "Settings updated")
+    
+    @rumps.clicked("🔔 Test Notification")  
+    def test_notification(self, sender):
+        """Test notification system"""
+        self.send_native_notification("🦕 Test Notification", 
+                                    "If you see this, notifications are working!", 
+                                    "Dino Tamagotchi")
 
     def show_settings(self, sender):
         """Show simple settings dialog"""
