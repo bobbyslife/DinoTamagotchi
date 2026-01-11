@@ -375,7 +375,14 @@ class EnhancedSupabaseDino(rumps.App):
             'dead': '💀'
         }
         
-        # Website categories (simplified for friendlier UI)
+        # Configuration versioning for remote updates
+        self.config_version = {
+            'website_categories': 1,
+            'dumpling_rates': 1,
+            'app_settings': 1
+        }
+        
+        # Website categories (can be updated remotely)
         self.website_categories = {
             'coding': {
                 'domains': ['github.com', 'gitlab.com', 'bitbucket.org', 'stackoverflow.com', 'codepen.io', 'replit.com'],
@@ -517,6 +524,10 @@ class EnhancedSupabaseDino(rumps.App):
         self.start_dumpling_monitoring()
         self.start_social_monitoring()
         self.start_realtime_sync()
+        
+        # Start remote config updates (if online)
+        if self.use_supabase:
+            self.start_remote_config_updates()
         
         print(f"🦕 Enhanced Dino Started!")
         print(f"👤 User: {self.username} (ID: {self.user_id})")
@@ -1539,6 +1550,95 @@ Currently I have {int(self.dumplings)} dumplings! Let's motivate each other to s
         
         threading.Thread(target=sync_loop, daemon=True).start()
         print("🔄 Real-time sync started")
+
+    def start_remote_config_updates(self):
+        """Start background thread for remote configuration updates"""
+        def config_updater():
+            while True:
+                try:
+                    self.update_remote_configs()
+                    time.sleep(3600)  # Check every hour
+                except Exception as e:
+                    print(f"Config update error: {e}")
+                    time.sleep(1800)  # Wait 30 minutes on error
+        
+        config_thread = threading.Thread(target=config_updater, daemon=True)
+        config_thread.start()
+        print("🔄 Remote config updates started")
+    
+    def update_remote_configs(self):
+        """Fetch and apply remote configuration updates"""
+        if not self.use_supabase:
+            return
+            
+        try:
+            # Fetch current config versions
+            result = self.supabase.table('app_config').select('config_key, config_value, version').execute()
+            
+            if not result.data:
+                return
+                
+            updated = False
+            
+            for config in result.data:
+                key = config['config_key']
+                remote_version = config['version']
+                local_version = self.config_version.get(key, 0)
+                
+                # Check if update is needed
+                if remote_version > local_version:
+                    print(f"🔄 Updating {key} from v{local_version} to v{remote_version}")
+                    
+                    if key == 'website_categories':
+                        self.website_categories = config['config_value']
+                        updated = True
+                    elif key == 'dumpling_rates':
+                        self.apply_dumpling_rate_update(config['config_value'])
+                        updated = True
+                    elif key == 'app_settings':
+                        self.apply_app_settings_update(config['config_value'])
+                        updated = True
+                    
+                    # Update local version
+                    self.config_version[key] = remote_version
+            
+            if updated:
+                self.send_native_notification("🔄 Config Updated", 
+                                            "Dumpling rates and categories updated!",
+                                            "Your app is now using the latest settings")
+                print("✅ Remote config updates applied")
+                
+        except Exception as e:
+            print(f"Remote config update error: {e}")
+    
+    def apply_dumpling_rate_update(self, rate_config):
+        """Apply updated dumpling rates"""
+        try:
+            base_rates = rate_config.get('base_rates', {})
+            
+            # Update website category rates
+            for category, config in self.website_categories.items():
+                if category in base_rates:
+                    config['dumpling_rate'] = base_rates[category]
+            
+            print("✅ Dumpling rates updated from remote config")
+        except Exception as e:
+            print(f"Error applying dumpling rate update: {e}")
+    
+    def apply_app_settings_update(self, settings_config):
+        """Apply updated app settings"""
+        try:
+            features = settings_config.get('features', {})
+            
+            # Apply feature toggles (future use)
+            if 'multiplayer' in features:
+                pass  # Could toggle multiplayer features
+            if 'website_tracking' in features:
+                pass  # Could toggle website tracking
+                
+            print("✅ App settings updated from remote config")
+        except Exception as e:
+            print(f"Error applying app settings update: {e}")
 
 if __name__ == "__main__":
     app = EnhancedSupabaseDino()
