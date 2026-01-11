@@ -622,8 +622,8 @@ class EnhancedSupabaseDino(rumps.App):
 
 I'm using a cute productivity app where you care for a virtual dino that lives in your menu bar! It earns dumplings by being productive and we can compete in real-time.
 
-🌟 See everyone's dinos: https://dino.rest
-📱 Download & setup guide: https://dino.rest/#download
+🌟 See everyone's dinos: https://dinotamagotchi.com
+📱 Download & setup guide: https://dinotamagotchi.com/#download
 
 My Friend Code: {friend_code}
 My Username: {self.username}
