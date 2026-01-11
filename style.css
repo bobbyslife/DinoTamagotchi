@@ -377,3 +377,43 @@ body {
         opacity: 0.5;
     }
 }
+
+/* Retro footer */
+.retro-footer {
+    background: #000;
+    border-top: 4px solid #7ED321;
+    padding: 30px 20px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.footer-link {
+    background: #7ED321;
+    border: 3px solid #000;
+    color: #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 12px 20px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all 0.1s;
+    box-shadow: 3px 3px 0 #000;
+}
+
+.footer-link:hover {
+    background: #9AE82F;
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #000;
+}
+
+.footer-link:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+}
