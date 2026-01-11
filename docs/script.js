@@ -216,12 +216,12 @@ class DinoWebsite {
 function downloadApp() {
     // For now, we'll link to GitHub releases or provide instructions
     // In production, you'd host the ZIP file and link to it
-    const downloadUrl = 'DinoTamagotchi-macOS.zip'; // Relative path
+    const downloadUrl = '../Dino-Tamagotchi-macOS.zip'; // Updated package
     
     // Try to trigger download
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'DinoTamagotchi-macOS.zip';
+    link.download = 'Dino-Tamagotchi-macOS.zip';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -229,14 +229,11 @@ function downloadApp() {
     // Show download instructions
     alert(`🦕 Download started!
 
-If the download didn't start automatically:
-1. Check your Downloads folder
-2. Or contact us for a direct link
-
-After downloading:
-1. Unzip the file
-2. Double-click 'install.sh'
-3. Follow the prompts
+SUPER EASY INSTALLATION:
+1. Unzip the downloaded file
+2. Double-click "🦕 Install Dino Tamagotchi.command"
+3. Follow the prompts (no terminal needed!)
+4. Your dino appears in the menu bar!
 
 Enjoy your dino companion!`);
 }

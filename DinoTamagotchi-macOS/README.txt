@@ -26,7 +26,7 @@ virtual dinosaur in your menu bar that reacts to your work habits.
 
 🌐 VISIT OUR COMMUNITY:
 -----------------------
-See everyone's dinos at: https://dinotamagotchi.com
+See everyone's dinos at: https://dino.rest
 
 💝 REQUIREMENTS:
 ----------------
@@ -42,7 +42,7 @@ See everyone's dinos at: https://dinotamagotchi.com
 
 🆘 NEED HELP?
 -------------
-Visit: https://dinotamagotchi.com
+Visit: https://dino.rest
 Issues: https://github.com/yourusername/DinoTamagotchi/issues
 
 Have fun with your new dino companion! 🦕✨

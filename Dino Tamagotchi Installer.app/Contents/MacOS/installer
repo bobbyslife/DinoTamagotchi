@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Get the directory where this app bundle is located
+BUNDLE_DIR="$(dirname "$(dirname "$(dirname "$0")")")"
+cd "$BUNDLE_DIR"
+
+# Show friendly installer dialog
+osascript << 'APPLESCRIPT'
+display dialog "🦕 Welcome to Dino Tamagotchi!
+
+This will install your virtual dinosaur companion that lives in your menu bar and helps you stay productive.
+
+Ready to install?" buttons {"Cancel", "Install"} default button "Install" with icon note with title "Dino Tamagotchi Installer"
+
+if button returned of result is "Install" then
+    display dialog "Installing Dino Tamagotchi...
+
+This may take a minute to download dependencies." buttons {"OK"} default button "OK" with icon note with title "Installing..." giving up after 2
+end if
+APPLESCRIPT
+
+if [ $? -ne 0 ]; then
+    exit 0
+fi
+
+# Open terminal to run the installer
+osascript -e 'tell application "Terminal" to do script "cd \"'$(pwd)'\" && chmod +x install.sh && ./install.sh"'

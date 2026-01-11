@@ -214,11 +214,11 @@ class RetroDinoWebsite {
 
 // Download function
 function downloadApp() {
-    const downloadUrl = 'DinoTamagotchi-macOS.zip';
+    const downloadUrl = 'Dino-Tamagotchi-macOS.zip';
     
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'DinoTamagotchi-macOS.zip';
+    link.download = 'Dino-Tamagotchi-macOS.zip';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -226,11 +226,13 @@ function downloadApp() {
     // Show retro download message
     alert(`🦕 DOWNLOAD STARTED!
 
-INSTALLATION INSTRUCTIONS:
+SUPER EASY INSTALL:
 1. UNZIP THE FILE
-2. DOUBLE-CLICK INSTALL.SH
+2. DOUBLE-CLICK "🦕 Install Dino Tamagotchi.command"
 3. FOLLOW THE PROMPTS
-4. ENJOY YOUR DINO COMPANION!`);
+4. YOUR DINO APPEARS IN MENU BAR!
+
+NO TERMINAL NEEDED!`);
 }
 
 // Initialize the retro website
