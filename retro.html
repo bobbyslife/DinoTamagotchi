@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦕 DINO TAMAGOTCHI - Retro Productivity</title>
+    <link rel="stylesheet" href="retro.css">
+</head>
+<body>
+    <div class="stars">
+        <div class="star">✦</div>
+        <div class="star">✦</div>
+        <div class="star">✦</div>
+        <div class="star">✦</div>
+    </div>
+    
+    <div class="container">
+        <header class="pixel-header">
+            <h1 class="pixel-title">DINO TAMAGOTCHI</h1>
+        </header>
+        
+        <main class="game-area">
+            <div class="dino-characters">
+                <div class="dino green">🦕</div>
+                <div class="dino blue">🦖</div>
+                <div class="dumpling">🥟</div>
+                <div class="dino fire">🔥🦖</div>
+            </div>
+            
+            <div class="platform"></div>
+        </main>
+        
+        <div class="warning-modal">
+            <div class="modal-header">
+                <button class="close-btn">✕</button>
+            </div>
+            <div class="modal-content">
+                <h2 class="warning-title">PRODUCTIVITY!</h2>
+                <p class="warning-text">
+                    YOUR DINO WILL EVOLVE
+                    BASED ON YOUR WORK HABITS.
+                    IF YOU DO NOT STAY
+                    PRODUCTIVE YOU CANNOT
+                    FEED YOUR DINO!
+                </p>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="pixel-btn download-btn" onclick="downloadApp()">
+                📱 DOWNLOAD DINO
+            </button>
+            <button class="pixel-btn gallery-btn" onclick="window.location.href='#gallery'">
+                🦕 VIEW COMMUNITY
+            </button>
+        </div>
+        
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">ACTIVE DINOS:</span>
+                <span class="stat-value" id="total-dinos">...</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">DUMPLINGS EARNED:</span>
+                <span class="stat-value" id="total-dumplings">...</span>
+            </div>
+        </div>
+    </div>
+    
+    <section id="gallery" class="retro-gallery">
+        <h2 class="section-title">DINO COMMUNITY</h2>
+        <div class="retro-dino-grid" id="retro-dino-grid">
+            <!-- Dinos will be loaded here -->
+        </div>
+    </section>
+    
+    <script src="retro.js"></script>
+</body>
+</html>
