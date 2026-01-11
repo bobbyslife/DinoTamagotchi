@@ -1,6 +1,5 @@
-// Dino Tamagotchi Website JavaScript
-
-class DinoWebsite {
+// Retro Dino Tamagotchi Website JavaScript
+class RetroDinoWebsite {
     constructor() {
         this.supabaseUrl = 'https://vcclceadrxrswxaxiitj.supabase.co';
         this.supabaseKey = 'sb_publishable_1SGzjoZCE65W6cNRU0_K4Q_CQTXYbCT';
@@ -11,6 +10,7 @@ class DinoWebsite {
         document.addEventListener('DOMContentLoaded', () => {
             this.loadDinoData();
             this.updateStats();
+            this.setupModalClose();
             
             // Update data every 30 seconds
             setInterval(() => {
@@ -18,6 +18,17 @@ class DinoWebsite {
                 this.updateStats();
             }, 30000);
         });
+    }
+
+    setupModalClose() {
+        const closeBtn = document.querySelector('.close-btn');
+        const modal = document.querySelector('.warning-modal');
+        
+        if (closeBtn && modal) {
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
     }
 
     async fetchFromSupabase(query) {
@@ -32,7 +43,6 @@ class DinoWebsite {
             
             if (!response.ok) {
                 if (response.status === 404 || response.status === 400) {
-                    // Database tables don't exist yet - this is normal for new setup
                     console.log('Database tables not set up yet - using fallback data');
                     return null;
                 }
@@ -54,7 +64,7 @@ class DinoWebsite {
             return;
         }
 
-        const dinoGrid = document.getElementById('dino-grid');
+        const dinoGrid = document.getElementById('retro-dino-grid');
         if (!dinoGrid) return;
 
         // Clear existing dinos except loading card
@@ -62,7 +72,7 @@ class DinoWebsite {
 
         // Create dino cards
         users.forEach(user => {
-            const dinoCard = this.createDinoCard(user);
+            const dinoCard = this.createRetroDinoCard(user);
             dinoGrid.appendChild(dinoCard);
         });
 
@@ -72,16 +82,16 @@ class DinoWebsite {
         }
     }
 
-    createDinoCard(user) {
+    createRetroDinoCard(user) {
         const card = document.createElement('div');
-        card.className = 'dino-card';
+        card.className = 'retro-dino-card';
 
         // Determine dino emoji based on state
         const dinoEmoji = this.getDinoEmoji(user.current_state, user.health);
         
         // Check if user is online (active in last 30 minutes)
         const isOnline = this.isRecentActivity(user.last_activity);
-        const onlineStatus = isOnline ? '🟢 Online' : '⚫ Offline';
+        const onlineStatus = isOnline ? 'ONLINE' : 'OFFLINE';
         
         // Format activity
         const activity = this.formatActivity(user.current_state);
@@ -89,10 +99,10 @@ class DinoWebsite {
         const dumplings = Math.round(user.session_dumplings || 0);
 
         card.innerHTML = `
-            <div class="dino-emoji">${dinoEmoji}</div>
-            <div class="dino-name">${user.username || 'Anonymous Dino'}</div>
-            <div class="dino-status">${onlineStatus} • ${activity}</div>
-            <div class="dino-stats">❤️ ${health}% • 🥟 ${dumplings} today</div>
+            <div class="retro-dino-emoji">${dinoEmoji}</div>
+            <div class="retro-dino-name">${user.username || 'ANONYMOUS DINO'}</div>
+            <div class="retro-dino-status">${onlineStatus} • ${activity.toUpperCase()}</div>
+            <div class="retro-dino-stats">HP: ${health}% • DUMPLINGS: ${dumplings}</div>
         `;
 
         return card;
@@ -101,23 +111,23 @@ class DinoWebsite {
     getDinoEmoji(state, health) {
         // Map states to emojis
         const stateEmojis = {
-            'coding': '🦕💻',
-            'working': '🦖💼',
-            'designing': '🦕🎨',
-            'browsing_productive': '🦕📖',
-            'browsing_social': '🦖📱',
-            'browsing_news': '🦖📰',
-            'browsing_entertainment': '🦖🍿',
-            'browsing_shopping': '🦖🛒',
-            'gaming': '🦕🎮',
-            'eating': '🦕🍖',
-            'sick': '🦖🤒',
-            'idle': '🦕'
+            'coding': '🦕',
+            'working': '🦖',
+            'designing': '🦕',
+            'browsing_productive': '🦕',
+            'browsing_social': '🦖',
+            'browsing_news': '🦖',
+            'browsing_entertainment': '🦖',
+            'browsing_shopping': '🦖',
+            'gaming': '🦕',
+            'eating': '🦕',
+            'sick': '🤒',
+            'idle': '😴'
         };
 
         // If health is very low, show sick dino
         if (health && health < 20) {
-            return '🦖🤒';
+            return '🤒';
         }
 
         return stateEmojis[state] || '🦕';
@@ -125,20 +135,20 @@ class DinoWebsite {
 
     formatActivity(state) {
         const activityNames = {
-            'coding': 'Coding',
-            'working': 'Working', 
-            'designing': 'Designing',
-            'browsing_productive': 'Learning',
-            'browsing_social': 'Social Media',
-            'browsing_news': 'Reading News',
-            'browsing_entertainment': 'Entertainment',
-            'browsing_shopping': 'Shopping',
-            'gaming': 'Gaming',
-            'eating': 'Feeding',
-            'idle': 'Chilling'
+            'coding': 'coding',
+            'working': 'working', 
+            'designing': 'designing',
+            'browsing_productive': 'learning',
+            'browsing_social': 'social media',
+            'browsing_news': 'reading news',
+            'browsing_entertainment': 'entertainment',
+            'browsing_shopping': 'shopping',
+            'gaming': 'gaming',
+            'eating': 'feeding',
+            'idle': 'idle'
         };
 
-        return activityNames[state] || 'Unknown';
+        return activityNames[state] || 'unknown';
     }
 
     isRecentActivity(lastActivity) {
@@ -163,17 +173,9 @@ class DinoWebsite {
         const totalDinos = users.length;
         const totalDumplings = users.reduce((sum, user) => sum + (user.total_dumplings_earned || 0), 0);
         
-        // Calculate productive hours this week (rough estimation)
-        const productiveHours = Math.round(totalDumplings / 10); // Estimate: 10 dumplings = 1 hour productive work
-        
         // Update DOM
         this.updateStatElement('total-dinos', totalDinos);
-        this.updateStatElement('total-hours', `${productiveHours}k`);
-        this.updateStatElement('total-dumplings', `${Math.round(totalDumplings / 1000)}k`);
-        
-        // Update community count
-        const onlineCount = users.filter(user => this.isRecentActivity(user.last_activity)).length;
-        this.updateStatElement('community-count', `${onlineCount} dinos online now`);
+        this.updateStatElement('total-dumplings', `${Math.round(totalDumplings)}`);
     }
 
     updateStatElement(id, value) {
@@ -184,41 +186,36 @@ class DinoWebsite {
     }
 
     showFallbackDinos() {
-        const dinoGrid = document.getElementById('dino-grid');
+        const dinoGrid = document.getElementById('retro-dino-grid');
         if (!dinoGrid) return;
 
         dinoGrid.innerHTML = `
-            <div class="dino-card">
-                <div class="dino-emoji">🦕💻</div>
-                <div class="dino-name">Bobby (Creator)</div>
-                <div class="dino-status">🟢 Online • Building the app!</div>
-                <div class="dino-stats">❤️ 100% • 🥟 156 total</div>
+            <div class="retro-dino-card">
+                <div class="retro-dino-emoji">🦕</div>
+                <div class="retro-dino-name">BOBBY (CREATOR)</div>
+                <div class="retro-dino-status">ONLINE • BUILDING</div>
+                <div class="retro-dino-stats">HP: 100% • DUMPLINGS: 156</div>
             </div>
-            <div class="dino-card">
-                <div class="dino-emoji">🦕</div>
-                <div class="dino-name">Your Dino</div>
-                <div class="dino-status">🎯 Join the Community!</div>
-                <div class="dino-stats">Download the app to see your dino here!</div>
+            <div class="retro-dino-card">
+                <div class="retro-dino-emoji">🦖</div>
+                <div class="retro-dino-name">YOUR DINO</div>
+                <div class="retro-dino-status">JOIN THE GAME!</div>
+                <div class="retro-dino-stats">DOWNLOAD TO START</div>
             </div>
         `;
     }
 
     showFallbackStats() {
-        // Show realistic data - you're the first user!
+        // Show realistic data
         this.updateStatElement('total-dinos', '1');
-        this.updateStatElement('total-hours', '42');
         this.updateStatElement('total-dumplings', '156');
-        this.updateStatElement('community-count', '1 dino online now');
     }
 }
 
 // Download function
 function downloadApp() {
-    // For now, we'll link to GitHub releases or provide instructions
-    // In production, you'd host the ZIP file and link to it
-    const downloadUrl = 'DinoTamagotchi-macOS.zip'; // Relative path
+    const downloadUrl = 'DinoTamagotchi-macOS.zip';
     
-    // Try to trigger download
     const link = document.createElement('a');
     link.href = downloadUrl;
     link.download = 'DinoTamagotchi-macOS.zip';
@@ -226,52 +223,15 @@ function downloadApp() {
     link.click();
     document.body.removeChild(link);
     
-    // Show download instructions
-    alert(`🦕 Download started!
+    // Show retro download message
+    alert(`🦕 DOWNLOAD STARTED!
 
-If the download didn't start automatically:
-1. Check your Downloads folder
-2. Or contact us for a direct link
-
-After downloading:
-1. Unzip the file
-2. Double-click 'install.sh'
-3. Follow the prompts
-
-Enjoy your dino companion!`);
+INSTALLATION INSTRUCTIONS:
+1. UNZIP THE FILE
+2. DOUBLE-CLICK INSTALL.SH
+3. FOLLOW THE PROMPTS
+4. ENJOY YOUR DINO COMPANION!`);
 }
 
-// Utility functions
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        // Show feedback
-        const btn = event.target;
-        const originalText = btn.textContent;
-        btn.textContent = '✅ Copied!';
-        btn.style.background = '#48bb78';
-        
-        setTimeout(() => {
-            btn.textContent = originalText;
-            btn.style.background = '#4299e1';
-        }, 2000);
-    }).catch(err => {
-        console.error('Failed to copy: ', err);
-        // Fallback for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        
-        const btn = event.target;
-        const originalText = btn.textContent;
-        btn.textContent = '✅ Copied!';
-        setTimeout(() => {
-            btn.textContent = originalText;
-        }, 2000);
-    });
-}
-
-// Initialize the website
-new DinoWebsite();
+// Initialize the retro website
+new RetroDinoWebsite();
