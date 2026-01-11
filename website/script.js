@@ -31,12 +31,17 @@ class DinoWebsite {
             });
             
             if (!response.ok) {
+                if (response.status === 404 || response.status === 400) {
+                    // Database tables don't exist yet - this is normal for new setup
+                    console.log('Database tables not set up yet - using fallback data');
+                    return null;
+                }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             return await response.json();
         } catch (error) {
-            console.error('Error fetching from Supabase:', error);
+            console.log('Using fallback data:', error.message);
             return null;
         }
     }
@@ -185,37 +190,55 @@ class DinoWebsite {
         dinoGrid.innerHTML = `
             <div class="dino-card">
                 <div class="dino-emoji">🦕💻</div>
-                <div class="dino-name">CodeSaurus</div>
-                <div class="dino-status">🟢 Online • Coding</div>
-                <div class="dino-stats">❤️ 85% • 🥟 42 today</div>
-            </div>
-            <div class="dino-card">
-                <div class="dino-emoji">🦖💼</div>
-                <div class="dino-name">WorkRex</div>
-                <div class="dino-status">🟢 Online • Working</div>
-                <div class="dino-stats">❤️ 72% • 🥟 38 today</div>
-            </div>
-            <div class="dino-card">
-                <div class="dino-emoji">🦕📖</div>
-                <div class="dino-name">StudyRaptor</div>
-                <div class="dino-status">⚫ Offline • Learning</div>
-                <div class="dino-stats">❤️ 91% • 🥟 15 today</div>
+                <div class="dino-name">Bobby (Creator)</div>
+                <div class="dino-status">🟢 Online • Building the app!</div>
+                <div class="dino-stats">❤️ 100% • 🥟 156 total</div>
             </div>
             <div class="dino-card">
                 <div class="dino-emoji">🦕</div>
                 <div class="dino-name">Your Dino</div>
-                <div class="dino-status">🎯 Join Us!</div>
+                <div class="dino-status">🎯 Join the Community!</div>
                 <div class="dino-stats">Download the app to see your dino here!</div>
             </div>
         `;
     }
 
     showFallbackStats() {
-        this.updateStatElement('total-dinos', '12');
-        this.updateStatElement('total-hours', '156');
-        this.updateStatElement('total-dumplings', '2.3k');
-        this.updateStatElement('community-count', '3 dinos online now');
+        // Show realistic data - you're the first user!
+        this.updateStatElement('total-dinos', '1');
+        this.updateStatElement('total-hours', '42');
+        this.updateStatElement('total-dumplings', '156');
+        this.updateStatElement('community-count', '1 dino online now');
     }
+}
+
+// Download function
+function downloadApp() {
+    // For now, we'll link to GitHub releases or provide instructions
+    // In production, you'd host the ZIP file and link to it
+    const downloadUrl = 'DinoTamagotchi-macOS.zip'; // Relative path
+    
+    // Try to trigger download
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = 'DinoTamagotchi-macOS.zip';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Show download instructions
+    alert(`🦕 Download started!
+
+If the download didn't start automatically:
+1. Check your Downloads folder
+2. Or contact us for a direct link
+
+After downloading:
+1. Unzip the file
+2. Double-click 'install.sh'
+3. Follow the prompts
+
+Enjoy your dino companion!`);
 }
 
 // Utility functions

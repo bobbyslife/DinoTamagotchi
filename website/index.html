@@ -93,11 +93,13 @@
                 <div class="step">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <h3>📥 Download the App</h3>
-                        <p>Clone or download the repository from GitHub</p>
-                        <div class="code-block">
-                            <code>git clone https://github.com/yourusername/DinoTamagotchi.git</code>
-                            <button class="copy-btn" onclick="copyToClipboard('git clone https://github.com/yourusername/DinoTamagotchi.git')">📋</button>
+                        <h3>📥 Download for macOS</h3>
+                        <p>Download the ready-to-install package - no coding required!</p>
+                        <div class="download-button-container">
+                            <a href="#" class="download-btn" onclick="downloadApp()">
+                                📱 Download Dino Tamagotchi.zip
+                            </a>
+                            <p class="download-note">~60KB • macOS 10.15+</p>
                         </div>
                     </div>
                 </div>
@@ -105,11 +107,13 @@
                 <div class="step">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <h3>🔧 Install Dependencies</h3>
-                        <p>Make sure you have Python 3.7+ and install required packages</p>
-                        <div class="code-block">
-                            <code>pip3 install rumps supabase</code>
-                            <button class="copy-btn" onclick="copyToClipboard('pip3 install rumps supabase')">📋</button>
+                        <h3>📂 Unzip & Install</h3>
+                        <p>Double-click the ZIP file, then double-click the installer</p>
+                        <div class="install-visual">
+                            <div class="file-icon">📁 DinoTamagotchi-macOS</div>
+                            <div class="arrow">→</div>
+                            <div class="file-icon">⚡ install.sh</div>
+                            <div class="install-note">← Double-click this!</div>
                         </div>
                     </div>
                 </div>
@@ -117,11 +121,12 @@
                 <div class="step">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <h3>🦕 Start Your Dino</h3>
-                        <p>Run the app and your dino will appear in your menu bar!</p>
-                        <div class="code-block">
-                            <code>cd DinoTamagotchi && python3 supabase_dino.py</code>
-                            <button class="copy-btn" onclick="copyToClipboard('cd DinoTamagotchi && python3 supabase_dino.py')">📋</button>
+                        <h3>🦕 Launch Your Dino</h3>
+                        <p>Find "Dino Tamagotchi" in your Applications and double-click!</p>
+                        <div class="launch-visual">
+                            <span class="app-icon">🦕</span>
+                            <span class="app-name">Dino Tamagotchi.app</span>
+                            <div class="launch-note">Your dino will appear in the menu bar!</div>
                         </div>
                     </div>
                 </div>
@@ -129,14 +134,36 @@
                 <div class="step">
                     <div class="step-number">4</div>
                     <div class="step-content">
-                        <h3>👥 Add Friends</h3>
-                        <p>Get a friend code from someone or share yours!</p>
+                        <h3>👥 Add Friends & Compete</h3>
+                        <p>Click your dino → "🆔 My Friend Code" → Share with friends!</p>
                         <div class="friend-code-demo">
                             <span class="code-example">DINO-A3B2F1</span>
                             <span class="code-help">← Example friend code</span>
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Alternative Installation -->
+            <div class="alternative-install">
+                <details>
+                    <summary>🛠️ Advanced: Install from Source</summary>
+                    <div class="alt-steps">
+                        <p><strong>For developers:</strong></p>
+                        <div class="code-block">
+                            <code>git clone https://github.com/yourusername/DinoTamagotchi.git</code>
+                            <button class="copy-btn" onclick="copyToClipboard('git clone https://github.com/yourusername/DinoTamagotchi.git')">📋</button>
+                        </div>
+                        <div class="code-block">
+                            <code>cd DinoTamagotchi && pip3 install rumps supabase</code>
+                            <button class="copy-btn" onclick="copyToClipboard('cd DinoTamagotchi && pip3 install rumps supabase')">📋</button>
+                        </div>
+                        <div class="code-block">
+                            <code>python3 supabase_dino.py</code>
+                            <button class="copy-btn" onclick="copyToClipboard('python3 supabase_dino.py')">📋</button>
+                        </div>
+                    </div>
+                </details>
             </div>
             
             <div class="download-footer">
