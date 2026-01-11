@@ -509,8 +509,8 @@ class EnhancedSupabaseDino(rumps.App):
         self.status_item = rumps.MenuItem(f"Status: {status}")
         
         # User info (cleaner)
-        db_status = "🗄️ Supabase" if self.use_supabase else "🗄️ Demo"
-        self.user_info_item = rumps.MenuItem(f"👤 {self.username} • {db_status}")
+        online_status = "🟢 Online" if self.use_supabase else "🔴 Offline"
+        self.user_info_item = rumps.MenuItem(f"👤 {self.username} • {online_status}")
         self.dumplings_item = rumps.MenuItem(f"🥟 Dumplings: {int(self.dumplings)}")
         self.session_item = rumps.MenuItem(f"📈 Today: +{self.dumpling_earning_session:.0f}")
         
@@ -546,8 +546,6 @@ class EnhancedSupabaseDino(rumps.App):
             self.dumplings_item,
             self.session_item,
             self.ranking_item,
-            rumps.separator,
-            rumps.MenuItem("🏠 Open Dashboard", callback=self.open_dashboard),
             rumps.separator,
             self.health_item,
             rumps.separator,
@@ -810,17 +808,6 @@ Currently I have {int(self.dumplings)} dumplings! Let's motivate each other to s
         self.send_native_notification("🔔 Notifications",
                                     f"Notifications {status.lower()}",
                                     "Settings updated")
-
-    @rumps.clicked("🏠 Open Dashboard")
-    def open_dashboard(self, sender):
-        """Open the main dashboard"""
-        try:
-            self.dashboard.create_dashboard()
-        except Exception as e:
-            print(f"Error opening dashboard: {e}")
-            self.send_native_notification("❌ Dashboard Error", 
-                                        "Could not open dashboard",
-                                        "Please check console for details")
 
     def show_settings(self, sender):
         """Show simple settings dialog"""
@@ -1321,6 +1308,11 @@ Currently I have {int(self.dumplings)} dumplings! Let's motivate each other to s
                 status = "Needs Care"
             
             self.status_item.title = f"Status: {status}"
+            
+            # Update user info with online/offline status
+            online_status = "🟢 Online" if self.use_supabase else "🔴 Offline"
+            self.user_info_item.title = f"👤 {self.username} • {online_status}"
+            
             self.dumplings_item.title = f"🥟 Dumplings: {int(self.dumplings)}"
             self.session_item.title = f"📈 Today: +{self.dumpling_earning_session:.0f}"
             
