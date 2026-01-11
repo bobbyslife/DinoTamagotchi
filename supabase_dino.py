@@ -79,18 +79,10 @@ class DinoDashboard:
                                    style='Subtitle.TLabel', foreground='green')
         self.mood_label.grid(row=1, column=0, columnspan=2, pady=(5, 10))
         
-        # Progress bars for stats
+        # Progress bar for health
         ttk.Label(status_frame, text="Health:", style='Small.TLabel').grid(row=2, column=0, sticky=tk.W)
         self.health_bar = ttk.Progressbar(status_frame, length=200, mode='determinate')
         self.health_bar.grid(row=2, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
-        
-        ttk.Label(status_frame, text="Energy:", style='Small.TLabel').grid(row=3, column=0, sticky=tk.W)
-        self.energy_bar = ttk.Progressbar(status_frame, length=200, mode='determinate')
-        self.energy_bar.grid(row=3, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
-        
-        ttk.Label(status_frame, text="Mood:", style='Small.TLabel').grid(row=4, column=0, sticky=tk.W)
-        self.mood_bar = ttk.Progressbar(status_frame, length=200, mode='determinate')
-        self.mood_bar.grid(row=4, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
         
         # === DUMPLINGS & ACTIVITY SECTION ===
         activity_frame = ttk.LabelFrame(main_frame, text="💰 Activity", padding="10")
@@ -137,6 +129,12 @@ class DinoDashboard:
         ttk.Button(buttons_frame, text="🔄 Sync Now", 
                   command=self.sync_now, width=15).grid(row=1, column=1, pady=(5, 0))
         
+        # Friend management in dashboard
+        ttk.Button(buttons_frame, text="👥 Add Friend", 
+                  command=self.add_friend_by_code, width=15).grid(row=2, column=0, padx=(0, 5), pady=(5, 0))
+        ttk.Button(buttons_frame, text="📤 Invite", 
+                  command=self.invite_from_dashboard, width=15).grid(row=2, column=1, pady=(5, 0))
+        
         # === INFO SECTION ===
         info_frame = ttk.LabelFrame(main_frame, text="ℹ️ Info", padding="10")
         info_frame.grid(row=4, column=0, sticky=(tk.W, tk.E))
@@ -163,27 +161,24 @@ class DinoDashboard:
             dino_emoji = self.parent.states.get(self.parent.current_state, '🦕')
             self.dino_display.config(text=dino_emoji)
             
-            # Update mood based on stats
-            avg_mood = (self.parent.happiness + self.parent.energy) / 2
-            if avg_mood >= 80:
-                mood_text = "Amazing & Energetic!"
-                mood_color = 'green'
-            elif avg_mood >= 60:
-                mood_text = "Happy & Productive"
-                mood_color = 'blue'
-            elif avg_mood >= 40:
-                mood_text = "Okay, needs care"
-                mood_color = 'orange'
+            # Update status based on health
+            if self.parent.health >= 80:
+                status_text = "Healthy & Strong!"
+                status_color = 'green'
+            elif self.parent.health >= 60:
+                status_text = "Doing Well"
+                status_color = 'blue'
+            elif self.parent.health >= 40:
+                status_text = "Okay, needs care"
+                status_color = 'orange'
             else:
-                mood_text = "Needs attention!"
-                mood_color = 'red'
+                status_text = "Needs attention!"
+                status_color = 'red'
                 
-            self.mood_label.config(text=mood_text, foreground=mood_color)
+            self.mood_label.config(text=status_text, foreground=status_color)
             
-            # Update progress bars
+            # Update health progress bar
             self.health_bar['value'] = self.parent.health
-            self.energy_bar['value'] = self.parent.energy
-            self.mood_bar['value'] = self.parent.happiness
             
             # Update dumplings
             self.dumplings_label.config(text=f"🥟 Dumplings: {int(self.parent.dumplings)}")
@@ -306,6 +301,28 @@ class DinoDashboard:
             messagebox.showinfo("🔄 Synced!", "Data synchronized with database.")
         else:
             messagebox.showinfo("🗄️ Demo Mode", "Connect to Supabase for real-time sync.")
+
+    def add_friend_by_code(self):
+        """Add friend by friend code through dashboard"""
+        from tkinter import simpledialog
+        
+        if not self.parent.use_supabase:
+            messagebox.showwarning("🗄️ Setup Required", "Connect to Supabase for multiplayer features.")
+            return
+        
+        friend_code = simpledialog.askstring("👥 Add Friend", 
+                                           "Enter your friend's code:")
+        
+        if friend_code and friend_code.strip():
+            result = self.parent.add_friend_by_code(friend_code.strip())
+            if result:
+                messagebox.showinfo("✅ Friend Added!", f"Successfully added {result}!")
+            else:
+                messagebox.showwarning("❌ Not Found", "Friend code not found. Make sure it's correct!")
+
+    def invite_from_dashboard(self):
+        """Show invitation from dashboard"""
+        self.parent.invite_friends(None)
     
     def on_close(self):
         """Handle dashboard close"""
@@ -415,10 +432,12 @@ class EnhancedSupabaseDino(rumps.App):
         self.dumpling_earning_session = 0
         self.last_dumpling_time = datetime.now()
         
-        # Multiplayer stats
+        # Enhanced multiplayer stats
         self.friends_list = []
         self.daily_ranking = 0
         self.online_friends = []
+        self.friend_requests = []
+        self.friend_code = None  # For easy sharing
         
         # Time tracking
         self.session_start = datetime.now()
@@ -455,8 +474,8 @@ class EnhancedSupabaseDino(rumps.App):
         # Initialize user in database
         self.initialize_user()
         
-        # Create minimal menu
-        self.create_minimal_menu()
+        # Create enhanced menu
+        self.create_enhanced_menu()
         
         # Send welcome notification (friendlier)
         self.send_native_notification("🦕 Dino Companion Started!", 
@@ -474,32 +493,323 @@ class EnhancedSupabaseDino(rumps.App):
         print(f"🥟 Dumplings: {int(self.dumplings)}")
         print(f"🗄️ Database: {'Supabase' if self.use_supabase else 'Local Demo'}")
 
-    def create_minimal_menu(self):
-        """Create ultra-minimal menu bar"""
-        # Get current mood
-        avg_mood = (self.happiness + self.energy) / 2
-        if avg_mood >= 80:
-            mood = "Amazing"
-        elif avg_mood >= 60:
-            mood = "Happy"
-        elif avg_mood >= 40:
-            mood = "Okay"
+    def create_enhanced_menu(self):
+        """Create enhanced but cleaner menu"""
+        # Get current status based on health
+        if self.health >= 80:
+            status = "Healthy"
+        elif self.health >= 60:
+            status = "Good"
+        elif self.health >= 40:
+            status = "Okay"
         else:
-            mood = "Tired"
+            status = "Needs Care"
         
-        self.status_item = rumps.MenuItem(f"Status: {mood}")
+        # Create menu items
+        self.status_item = rumps.MenuItem(f"Status: {status}")
         
+        # User info (cleaner)
+        db_status = "🗄️ Supabase" if self.use_supabase else "🗄️ Demo"
+        self.user_info_item = rumps.MenuItem(f"👤 {self.username} • {db_status}")
+        self.dumplings_item = rumps.MenuItem(f"🥟 Dumplings: {int(self.dumplings)}")
+        self.session_item = rumps.MenuItem(f"📈 Today: +{self.dumpling_earning_session:.0f}")
+        
+        # Essential stats (simplified)
+        self.health_item = rumps.MenuItem(f"❤️ Health: {int(self.health)}%")
+        
+        # Current activity (friendlier)
+        activity_text = self.get_friendly_activity_text()
+        self.activity_item = rumps.MenuItem(f"🎯 {activity_text}")
+        
+        # Time tracking (top categories only)
+        session_minutes = int((datetime.now() - self.session_start).total_seconds() / 60)
+        self.session_time_item = rumps.MenuItem(f"⏰ Session: {session_minutes}m")
+        
+        # Key time stats
+        coding_time = int(self.time_spent.get('coding', 0) / 60)
+        social_time = int(self.time_spent.get('browsing_social', 0) / 60)
+        
+        self.coding_time_item = rumps.MenuItem(f"  💻 Coding: {coding_time}m")
+        self.social_time_item = rumps.MenuItem(f"  📱 Social: {social_time}m")
+        
+        # Multiplayer (simplified)
+        self.ranking_item = rumps.MenuItem("🏆 Checking rankings...")
+        
+        # Actions
+        self.notifications_toggle = rumps.MenuItem("🔔 Notifications: ON", callback=self.toggle_notifications)
+        
+        # Build menu
         self.menu = [
             self.status_item,
             rumps.separator,
+            self.user_info_item,
+            self.dumplings_item,
+            self.session_item,
+            self.ranking_item,
+            rumps.separator,
             rumps.MenuItem("🏠 Open Dashboard", callback=self.open_dashboard),
             rumps.separator,
-            rumps.MenuItem("🍖 Quick Feed", callback=self.feed),
-            rumps.MenuItem("🫳 Quick Pet", callback=self.pet),
+            self.health_item,
             rumps.separator,
-            rumps.MenuItem("⚙️ Settings", callback=self.show_settings),
+            self.activity_item,
+            self.session_time_item,
+            self.coding_time_item,
+            self.social_time_item,
+            rumps.separator,
+            rumps.MenuItem("🥟 Feed (-5)", callback=self.feed),
+            rumps.MenuItem("🫳 Pet (free)", callback=self.pet),
+            rumps.separator,
+            rumps.MenuItem("👥 Friends & Multiplayer", callback=self.show_friends_menu),
+            rumps.MenuItem("📤 Invite Friends", callback=self.invite_friends),
+            rumps.MenuItem("🆔 My Friend Code", callback=self.share_friend_code),
+            self.notifications_toggle,
+            rumps.separator,
             rumps.MenuItem("🔄 Quit", callback=self.quit_app)
         ]
+
+    def get_friendly_activity_text(self):
+        """Get friendly description of current activity"""
+        activity_messages = {
+            'coding': 'Coding (earning dumplings!)',
+            'working': 'Being productive!',
+            'browsing_productive': 'Learning',
+            'browsing_social': 'Social media',
+            'browsing_entertainment': 'Entertainment',
+            'browsing_news': 'Reading news',
+            'browsing_shopping': 'Shopping',
+            'idle': 'Chilling'
+        }
+        return activity_messages.get(self.current_state, 'Unknown activity')
+
+    def show_friends_menu(self, sender):
+        """Show enhanced friends and multiplayer menu"""
+        if not self.use_supabase:
+            self.send_native_notification("🗄️ Supabase Setup Required",
+                                        "Connect to database for multiplayer",
+                                        "Update SUPABASE_URL and SUPABASE_KEY in code")
+            return
+        
+        try:
+            friends_data = self.get_friends_data()
+            online_count = len([f for f in friends_data if self.is_recent_activity(f)])
+            
+            if friends_data:
+                # Show friend status and leaderboard
+                self.show_detailed_leaderboard(friends_data)
+            else:
+                self.send_native_notification("👥 No Friends Yet!",
+                                            f"Share your friend code: {self.get_friend_code()}",
+                                            "Invite friends to compete and have more fun!")
+        except Exception as e:
+            print(f"Friends menu error: {e}")
+            self.send_native_notification("❌ Connection Error",
+                                        "Could not load friends data",
+                                        "Check your internet connection")
+
+    def invite_friends(self, sender):
+        """Create and share invitation"""
+        import tkinter as tk
+        from tkinter import messagebox
+        
+        if not self.use_supabase:
+            self.send_native_notification("🗄️ Setup Required",
+                                        "Connect to Supabase first",
+                                        "Multiplayer needs database connection")
+            return
+        
+        friend_code = self.get_friend_code()
+        invitation_text = f"""🦕 Join me in Dino Tamagotchi!
+
+I'm using a cute productivity app where you care for a virtual dino that lives in your menu bar! It earns dumplings by being productive and we can compete in real-time.
+
+🌟 See everyone's dinos: https://dinotamagotchi.com
+📱 Download & setup guide: https://dinotamagotchi.com/#download
+
+My Friend Code: {friend_code}
+My Username: {self.username}
+
+1. Visit the website to see the community
+2. Follow the download guide 
+3. Add my friend code to start competing!
+
+Currently I have {int(self.dumplings)} dumplings! Let's motivate each other to stay productive! 🏆"""
+        
+        try:
+            # Copy invitation to clipboard
+            import subprocess
+            subprocess.run(['pbcopy'], input=invitation_text.encode(), check=True)
+            
+            self.send_native_notification("📤 Invitation Ready!",
+                                        "Invitation copied to clipboard",
+                                        f"Share it to invite friends! Code: {friend_code}")
+        except:
+            # Fallback - show in dialog
+            root = tk.Tk()
+            root.withdraw()
+            messagebox.showinfo("📤 Invitation Text", invitation_text)
+            root.destroy()
+
+    def share_friend_code(self, sender):
+        """Share simplified friend code"""
+        friend_code = self.get_friend_code()
+        
+        try:
+            import subprocess
+            subprocess.run(['pbcopy'], input=friend_code.encode(), check=True)
+            clipboard_note = " (Copied!)"
+        except:
+            clipboard_note = ""
+        
+        self.send_native_notification("🆔 My Friend Code",
+                                    f"{friend_code}{clipboard_note}",
+                                    f"Share this code so friends can add you!")
+
+    def get_friend_code(self):
+        """Get or create a memorable friend code"""
+        if not self.friend_code:
+            # Create a more memorable friend code based on user ID and username
+            import hashlib
+            hash_input = f"{self.user_id}-{self.username}".encode()
+            hash_result = hashlib.md5(hash_input).hexdigest()[:6].upper()
+            self.friend_code = f"{self.username[:4].upper()}-{hash_result}"
+        
+        return self.friend_code
+
+    def show_detailed_leaderboard(self, friends_data):
+        """Show detailed leaderboard with friend status"""
+        try:
+            # Add yourself to the data
+            all_users = friends_data + [{
+                'username': self.username,
+                'session_dumplings': self.dumpling_earning_session,
+                'total_dumplings_earned': self.total_dumplings_earned,
+                'user_id': self.user_id,
+                'health': self.health,
+                'current_state': self.current_state,
+                'last_activity': datetime.now().isoformat()
+            }]
+            
+            # Sort by session dumplings
+            sorted_users = sorted(all_users, key=lambda x: x.get('session_dumplings', 0), reverse=True)
+            
+            my_rank = next((i+1 for i, user in enumerate(sorted_users) if user.get('user_id') == self.user_id), len(all_users))
+            
+            # Count online friends
+            online_count = len([f for f in friends_data if self.is_recent_activity(f)])
+            
+            # Create detailed status message
+            top_3 = sorted_users[:3]
+            leaderboard_text = "\\n".join([
+                f"{'🏆' if i==0 else '🥈' if i==1 else '🥉'} {user['username']}: {int(user.get('session_dumplings', 0))} dumplings"
+                for i, user in enumerate(top_3)
+            ])
+            
+            # Show current activities of friends
+            friend_activities = []
+            for friend in friends_data[:3]:  # Show top 3 friends' activities
+                if self.is_recent_activity(friend):
+                    state = friend.get('current_state', 'idle')
+                    activity = self.get_friendly_activity_from_state(state)
+                    friend_activities.append(f"• {friend['username']}: {activity}")
+            
+            activities_text = "\\n".join(friend_activities) if friend_activities else "No friends currently active"
+            
+            self.send_native_notification("🏆 Daily Leaderboard",
+                                        f"{leaderboard_text}\\n\\nYou're #{my_rank} of {len(all_users)}",
+                                        f"{online_count}/{len(friends_data)} friends online")
+            
+            # Update menu item
+            self.ranking_item.title = f"🏆 #{my_rank} of {len(all_users)} • {online_count} online"
+            
+        except Exception as e:
+            print(f"Detailed leaderboard error: {e}")
+
+    def get_friendly_activity_from_state(self, state):
+        """Convert state to friendly activity description"""
+        activity_map = {
+            'coding': 'Coding 💻',
+            'working': 'Working 💼', 
+            'browsing_productive': 'Learning 📖',
+            'browsing_social': 'Social media 📱',
+            'browsing_entertainment': 'Entertainment 🍿',
+            'browsing_news': 'Reading news 📰',
+            'browsing_shopping': 'Shopping 🛒',
+            'idle': 'Chilling 😴'
+        }
+        return activity_map.get(state, 'Unknown activity')
+
+    def is_recent_activity(self, friend_data):
+        """Check if friend has recent activity (within 30 minutes)"""
+        try:
+            last_activity = friend_data.get('last_activity')
+            if not last_activity:
+                return False
+            
+            # Handle different datetime formats
+            if last_activity.endswith('Z'):
+                last_activity = last_activity[:-1] + '+00:00'
+            
+            last_time = datetime.fromisoformat(last_activity)
+            if last_time.tzinfo:
+                last_time = last_time.replace(tzinfo=None)
+                
+            return (datetime.now() - last_time) < timedelta(minutes=30)
+        except Exception as e:
+            print(f"Activity check error: {e}")
+            return False
+
+    def show_leaderboard(self, sender):
+        """Show current live leaderboard"""
+        try:
+            friends_data = self.get_friends_data()
+            
+            # Add yourself to the data
+            all_users = friends_data + [{
+                'username': self.username,
+                'session_dumplings': self.dumpling_earning_session,
+                'total_dumplings_earned': self.total_dumplings_earned
+            }]
+            
+            if len(all_users) > 1:
+                # Sort by session dumplings
+                sorted_users = sorted(all_users, key=lambda x: x.get('session_dumplings', 0), reverse=True)
+                
+                my_rank = next((i+1 for i, user in enumerate(sorted_users) if user['username'] == self.username), len(all_users))
+                
+                # Show top 3
+                top_3 = sorted_users[:3]
+                leaderboard = "\\n".join([
+                    f"{'🏆' if i==0 else '🥈' if i==1 else '🥉'} {user['username']}: {int(user.get('session_dumplings', 0))} today"
+                    for i, user in enumerate(top_3)
+                ])
+                
+                self.send_native_notification("🏆 Daily Leaderboard",
+                                            leaderboard,
+                                            f"You're #{my_rank} of {len(all_users)}")
+                
+                # Update menu item
+                self.ranking_item.title = f"🏆 You're #{my_rank} of {len(all_users)}"
+            else:
+                self.send_native_notification("👥 No Friends Yet",
+                                            "Share your ID to compete with friends!",
+                                            f"Your ID: {self.user_id}")
+                self.ranking_item.title = "🏆 Share ID for multiplayer"
+                
+        except Exception as e:
+            print(f"Leaderboard error: {e}")
+            self.send_native_notification("❌ Leaderboard Error",
+                                        "Could not load rankings",
+                                        "Check your connection")
+
+    def toggle_notifications(self, sender):
+        """Toggle notifications"""
+        self.notifications_enabled = not self.notifications_enabled
+        status = "ON" if self.notifications_enabled else "OFF"
+        sender.title = f"🔔 Notifications: {status}"
+        
+        self.send_native_notification("🔔 Notifications",
+                                    f"Notifications {status.lower()}",
+                                    "Settings updated")
 
     @rumps.clicked("🏠 Open Dashboard")
     def open_dashboard(self, sender):
@@ -660,12 +970,11 @@ class EnhancedSupabaseDino(rumps.App):
         """Feed the dino"""
         if self.dumplings >= 5:
             self.dumplings -= 5
-            self.happiness = min(100, self.happiness + 15)
-            self.health = min(100, self.health + 10)
+            self.health = min(100, self.health + 20)
             
             self.send_native_notification("🥟 Nom Nom!", 
                                         "Your dino enjoyed the meal!",
-                                        f"Health +10, Happiness +15")
+                                        f"Health +20")
             self.save_data()
             if self.use_supabase:
                 self.sync_to_supabase()
@@ -677,12 +986,11 @@ class EnhancedSupabaseDino(rumps.App):
     @rumps.clicked("🫳 Quick Pet")  
     def pet(self, sender):
         """Pet the dino"""
-        self.happiness = min(100, self.happiness + 8)
-        self.energy = min(100, self.energy + 5)
+        self.health = min(100, self.health + 10)
         
         self.send_native_notification("🫳 Aww!", 
                                     "Your dino feels loved!",
-                                    f"Happiness +8, Energy +5")
+                                    f"Health +10")
         self.save_data()
 
     def get_friends_data(self):
@@ -739,8 +1047,6 @@ class EnhancedSupabaseDino(rumps.App):
                 'dumplings': self.dumplings,
                 'total_dumplings_earned': self.total_dumplings_earned,
                 'health': self.health,
-                'happiness': self.happiness,
-                'energy': self.energy,
                 'current_state': self.current_state,
                 'productive_time_today': self.productive_time_today,
                 'session_dumplings': self.dumpling_earning_session,
@@ -970,32 +1276,23 @@ class EnhancedSupabaseDino(rumps.App):
             if dumplings_earned > 0:
                 self.total_dumplings_earned += dumplings_earned
         
-        # Update mood based on activity
+        # Update health based on activity
         if dumplings_earned > 0:
-            self.happiness = min(100, self.happiness + 1)
-            self.energy = min(100, self.energy + 0.5)
+            self.health = min(100, self.health + 0.5)  # Gradual health improvement
         elif dumplings_earned < 0:
-            self.happiness = max(0, self.happiness - 0.5)
-            self.energy = max(0, self.energy - 0.2)
+            self.health = max(0, self.health - 0.3)  # Gradual health decline
         
         self.last_dumpling_time = now
 
     def update_stats(self):
         """Update dino stats"""
-        # Gradually decrease stats over time
+        # Gradually decrease health over time if not being productive
         now = datetime.now()
         time_diff = (now - getattr(self, 'last_stat_update', now)).total_seconds() / 3600  # Hours
         
         if time_diff > 0:
-            # Decrease energy and happiness slowly over time
-            self.energy = max(0, self.energy - time_diff * 2)
-            self.happiness = max(0, self.happiness - time_diff * 1)
-            
-            # Health depends on other stats
-            if self.energy < 20 or self.happiness < 20:
-                self.health = max(0, self.health - time_diff * 5)
-            else:
-                self.health = min(100, self.health + time_diff * 1)
+            # Health decreases slowly over time without care
+            self.health = max(0, self.health - time_diff * 1)
         
         self.last_stat_update = now
 
@@ -1004,8 +1301,47 @@ class EnhancedSupabaseDino(rumps.App):
         try:
             dino_emoji = self.states.get(self.current_state, '🦕')
             self.title = dino_emoji
+            
+            # Update menu items
+            self.update_menu_items()
         except Exception as e:
             print(f"Error updating menu title: {e}")
+
+    def update_menu_items(self):
+        """Update dynamic menu items"""
+        try:
+            # Update status based on health
+            if self.health >= 80:
+                status = "Healthy"
+            elif self.health >= 60:
+                status = "Good"
+            elif self.health >= 40:
+                status = "Okay"
+            else:
+                status = "Needs Care"
+            
+            self.status_item.title = f"Status: {status}"
+            self.dumplings_item.title = f"🥟 Dumplings: {int(self.dumplings)}"
+            self.session_item.title = f"📈 Today: +{self.dumpling_earning_session:.0f}"
+            
+            self.health_item.title = f"❤️ Health: {int(self.health)}%"
+            
+            # Update activity
+            activity_text = self.get_friendly_activity_text()
+            self.activity_item.title = f"🎯 {activity_text}"
+            
+            # Update time tracking
+            session_minutes = int((datetime.now() - self.session_start).total_seconds() / 60)
+            self.session_time_item.title = f"⏰ Session: {session_minutes}m"
+            
+            coding_time = int(self.time_spent.get('coding', 0) / 60)
+            social_time = int(self.time_spent.get('browsing_social', 0) / 60)
+            
+            self.coding_time_item.title = f"  💻 Coding: {coding_time}m"
+            self.social_time_item.title = f"  📱 Social: {social_time}m"
+            
+        except Exception as e:
+            print(f"Error updating menu items: {e}")
 
     def start_social_monitoring(self):
         """Start social monitoring"""
@@ -1022,7 +1358,7 @@ class EnhancedSupabaseDino(rumps.App):
         print("👥 Social monitoring started")
 
     def check_competitive_updates(self):
-        """Check for competitive updates and send notifications"""
+        """Check for competitive updates and send engaging notifications"""
         try:
             friends_data = self.get_friends_data()
             
@@ -1036,23 +1372,129 @@ class EnhancedSupabaseDino(rumps.App):
                 now - self.last_social_update < timedelta(minutes=15)):
                 return
             
-            # Find the highest performer today
-            top_performer = max(friends_data, key=lambda x: x.get('session_dumplings', 0))
             my_session_dumplings = self.dumpling_earning_session
             
-            # If someone is significantly ahead of you
-            if top_performer['session_dumplings'] > my_session_dumplings + 20:
-                gap = top_performer['session_dumplings'] - my_session_dumplings
+            # Find interesting social dynamics
+            notifications_sent = 0
+            
+            # 1. Check if someone passed you
+            sorted_users = sorted(friends_data, key=lambda x: x.get('session_dumplings', 0), reverse=True)
+            my_rank = len([f for f in friends_data if f.get('session_dumplings', 0) > my_session_dumplings]) + 1
+            
+            for friend in sorted_users[:3]:  # Check top 3
+                friend_dumplings = friend.get('session_dumplings', 0)
                 
-                self.send_native_notification(
-                    "🏃‍♂️ Falling Behind!",
-                    f"{top_performer['username']} has {gap:.0f} more dumplings!",
-                    f"Time to catch up! 🥟"
-                )
+                # Someone just passed you with a small margin
+                if (friend_dumplings > my_session_dumplings and 
+                    friend_dumplings - my_session_dumplings <= 10 and
+                    self.is_recent_activity(friend)):
+                    
+                    activity = self.get_friendly_activity_from_state(friend.get('current_state', 'idle'))
+                    self.send_native_notification(
+                        "🏆 Competition Alert!",
+                        f"{friend['username']} just passed you while {activity}",
+                        f"They're ahead by {friend_dumplings - my_session_dumplings:.0f} dumplings!"
+                    )
+                    notifications_sent += 1
+                    break
+            
+            # 2. Motivational notifications for big gaps
+            if not notifications_sent:
+                top_performer = max(friends_data, key=lambda x: x.get('session_dumplings', 0))
+                
+                if top_performer['session_dumplings'] > my_session_dumplings + 30:
+                    gap = top_performer['session_dumplings'] - my_session_dumplings
+                    
+                    motivational_messages = [
+                        f"🚀 {top_performer['username']} is crushing it with {gap:.0f} more dumplings!",
+                        f"💪 Time to step up! {top_performer['username']} is {gap:.0f} ahead!",
+                        f"🔥 {top_performer['username']} is on fire! Can you catch up?",
+                    ]
+                    
+                    import random
+                    message = random.choice(motivational_messages)
+                    
+                    self.send_native_notification(
+                        "🏃‍♂️ Challenge Time!",
+                        message,
+                        "Your dino believes in you! 🦕"
+                    )
+                    notifications_sent += 1
+            
+            # 3. Friend achievement celebrations
+            if not notifications_sent:
+                for friend in friends_data:
+                    friend_total = friend.get('total_dumplings_earned', 0)
+                    
+                    # Check for milestone achievements (every 100 dumplings)
+                    if friend_total > 0 and friend_total % 100 < 5:  # Just hit a milestone
+                        self.send_native_notification(
+                            "🎉 Friend Achievement!",
+                            f"{friend['username']} just hit {friend_total} total dumplings!",
+                            "Send them a congrats! 🥳"
+                        )
+                        notifications_sent += 1
+                        break
+            
+            # 4. Productivity buddy notifications
+            if not notifications_sent:
+                # Find friends who are currently being productive
+                productive_friends = [
+                    f for f in friends_data 
+                    if (f.get('current_state', '').startswith('coding') or 
+                        f.get('current_state', '').startswith('working')) and
+                    self.is_recent_activity(f)
+                ]
+                
+                if productive_friends and self.current_state in ['idle', 'browsing_social', 'browsing_entertainment']:
+                    friend = random.choice(productive_friends)
+                    activity = self.get_friendly_activity_from_state(friend.get('current_state', 'working'))
+                    
+                    self.send_native_notification(
+                        "💼 Productivity Buddy Alert!",
+                        f"{friend['username']} is {activity} right now!",
+                        "Maybe join them? Your dino would love some productivity! 🦕"
+                    )
+                    notifications_sent += 1
+            
+            if notifications_sent > 0:
                 self.last_social_update = now
                 
         except Exception as e:
             print(f"Error checking competitive updates: {e}")
+
+    def add_friend_by_code(self, friend_code):
+        """Add friend by their friend code"""
+        if not self.use_supabase:
+            return None
+            
+        try:
+            # Find user by friend code pattern
+            # Friend codes are like "DINO-ABC123" where DINO is username prefix
+            username_prefix = friend_code.split('-')[0].lower()
+            
+            # Search for users with matching friend code pattern
+            result = self.supabase.table('users').select('*').execute()
+            
+            for user in result.data:
+                if user['user_id'] == self.user_id:  # Don't add yourself
+                    continue
+                
+                # Check if this user's friend code matches
+                import hashlib
+                hash_input = f"{user['user_id']}-{user['username']}"
+                user_friend_code = f"{user['username'][:4].upper()}-{hashlib.md5(hash_input.encode()).hexdigest()[:6].upper()}"
+                
+                if user_friend_code == friend_code.upper():
+                    # Found the user! Add them as friend
+                    # For now, just return success - in a real app you'd manage a friends table
+                    return user['username']
+            
+            return None  # Friend code not found
+            
+        except Exception as e:
+            print(f"Error adding friend: {e}")
+            return None
 
     def start_realtime_sync(self):
         """Start real-time syncing"""

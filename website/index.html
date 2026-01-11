@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦕 Dino Tamagotchi - Productivity Companion</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container">
+            <h1>🦕 <span class="gradient-text">Dino Tamagotchi</span></h1>
+            <p class="subtitle">The cutest way to stay productive</p>
+            
+            <!-- Stats Banner -->
+            <div class="stats-banner">
+                <div class="stat">
+                    <span class="stat-number" id="total-dinos">...</span>
+                    <span class="stat-label">Happy Dinos</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="total-hours">...</span>
+                    <span class="stat-label">Productive Hours This Week</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="total-dumplings">...</span>
+                    <span class="stat-label">Dumplings Earned</span>
+                </div>
+            </div>
+            
+            <div class="hero-buttons">
+                <a href="#download" class="btn btn-primary">📱 Get Started</a>
+                <a href="#gallery" class="btn btn-secondary">🦕 Meet the Dinos</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- What is it Section -->
+    <section class="what-is-it">
+        <div class="container">
+            <h2>What is Dino Tamagotchi?</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🦕</div>
+                    <h3>Virtual Dino Companion</h3>
+                    <p>Adopt a cute dinosaur that lives in your macOS menu bar and reacts to your productivity!</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🥟</div>
+                    <h3>Earn Dumplings</h3>
+                    <p>Code, work, and learn to earn dumplings. Waste time on social media and lose them!</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">👥</div>
+                    <h3>Compete with Friends</h3>
+                    <p>Add friends and compete in real-time leaderboards. Get motivated by social pressure!</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>Smart Activity Tracking</h3>
+                    <p>Automatically detects what you're doing - from coding in VS Code to browsing GitHub!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dino Gallery -->
+    <section id="gallery" class="gallery">
+        <div class="container">
+            <h2>🦕 Meet Our Dino Community</h2>
+            <p class="gallery-description">See all the hardworking dinos and their humans!</p>
+            
+            <div class="dino-grid" id="dino-grid">
+                <!-- Dinos will be loaded here -->
+                <div class="dino-card loading">
+                    <div class="dino-emoji">🦕</div>
+                    <div class="dino-name">Loading dinos...</div>
+                </div>
+            </div>
+            
+            <div class="gallery-footer">
+                <p>Join the community and see your dino here!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="download">
+        <div class="container">
+            <h2>📱 Get Your Dino Companion</h2>
+            <div class="download-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>📥 Download the App</h3>
+                        <p>Clone or download the repository from GitHub</p>
+                        <div class="code-block">
+                            <code>git clone https://github.com/yourusername/DinoTamagotchi.git</code>
+                            <button class="copy-btn" onclick="copyToClipboard('git clone https://github.com/yourusername/DinoTamagotchi.git')">📋</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>🔧 Install Dependencies</h3>
+                        <p>Make sure you have Python 3.7+ and install required packages</p>
+                        <div class="code-block">
+                            <code>pip3 install rumps supabase</code>
+                            <button class="copy-btn" onclick="copyToClipboard('pip3 install rumps supabase')">📋</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>🦕 Start Your Dino</h3>
+                        <p>Run the app and your dino will appear in your menu bar!</p>
+                        <div class="code-block">
+                            <code>cd DinoTamagotchi && python3 supabase_dino.py</code>
+                            <button class="copy-btn" onclick="copyToClipboard('cd DinoTamagotchi && python3 supabase_dino.py')">📋</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>👥 Add Friends</h3>
+                        <p>Get a friend code from someone or share yours!</p>
+                        <div class="friend-code-demo">
+                            <span class="code-example">DINO-A3B2F1</span>
+                            <span class="code-help">← Example friend code</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="download-footer">
+                <p>🍎 <strong>macOS Only</strong> - Requires macOS 10.15+ (Catalina or later)</p>
+                <p>🌟 <strong>Free & Open Source</strong> - MIT License</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>🦕 Dino Tamagotchi</h4>
+                    <p>Making productivity fun, one dino at a time!</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Links</h4>
+                    <a href="https://github.com/yourusername/DinoTamagotchi">GitHub</a>
+                    <a href="#download">Download</a>
+                    <a href="#gallery">Gallery</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <p id="community-count">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
